@@ -13,8 +13,8 @@
  * never finishes step 2 is not lost. Step 1 and step 2 share the same lead_session_id.
  */
 window.SITE_CONFIG = {
-  FORM_ENDPOINT: '', // <-- paste the form-receiving URL here
-  FORM_SEND_AS_TEXT_PLAIN: false,
+  FORM_ENDPOINT: 'https://hooks.zapier.com/hooks/catch/23924041/4dvth39/', // Zapier "Website form submissions" zap
+  FORM_SEND_AS_TEXT_PLAIN: true,
   SEND_STEP1_PARTIAL: true,
   PHONE_DISPLAY: '(216) 999-6814'
 };

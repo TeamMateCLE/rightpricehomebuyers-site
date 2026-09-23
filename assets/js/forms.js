@@ -112,6 +112,11 @@
       console.log('[forms] SITE_CONFIG.FORM_ENDPOINT is empty - submission not sent:', payload);
       return Promise.resolve(true);
     }
+    // One readable block of every field, used as the body of the notification email.
+    payload.summary = Object.keys(payload).filter(function (k) { return k !== 'summary'; }).map(function (k) {
+      var v = payload[k];
+      return k + ': ' + (Array.isArray(v) ? v.join(', ') : (v == null ? '' : v));
+    }).join('\n');
     return fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': cfg.FORM_SEND_AS_TEXT_PLAIN ? 'text/plain;charset=UTF-8' : 'application/json' },

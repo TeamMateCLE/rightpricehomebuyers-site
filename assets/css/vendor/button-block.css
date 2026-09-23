@@ -1,0 +1,28 @@
+.button-popup-content-button span {
+    color: #fff;
+    background-color: #32373c;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+.button-popup-content-button button, .button-popup-content-button span {
+    display: inline-block;
+    margin-bottom: 0;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    touch-action: manipulation;
+    cursor: pointer;
+    user-select: none;
+    background-image: none;
+    border: 1px solid transparent;
+    border-image: initial;
+    border-radius: 50px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.2;
+    min-width: 150px;
+    padding: 14px 28px;
+}
+.template_2_to_1 .ouradvatagestemp2 .button-popup-content-button{
+    text-align: center !important;
+}

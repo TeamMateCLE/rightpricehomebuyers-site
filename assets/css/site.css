@@ -1,0 +1,7 @@
+/* Additions for the static copy (loaded after the original theme styles). */
+.rp-hp { position: absolute !important; left: -10000px !important; width: 1px; height: 1px; overflow: hidden; }
+.rp-form-message { background: #fff1f0; border: 1px solid #c02b0a; color: #c02b0a; border-radius: 6px; padding: 10px 14px; margin: 0 0 14px; font-size: 14px; line-height: 1.5; text-align: left; }
+.rp-form-message a { color: #c02b0a; text-decoration: underline; }
+.rp-error-msg { color: #c02b0a !important; font-size: 13px; margin-top: 4px; text-align: left; }
+.has-error .form-control { border-color: #c02b0a !important; }
+.gfield_error input, .gfield_error select, .gfield_error textarea { border-color: #c02b0a !important; }

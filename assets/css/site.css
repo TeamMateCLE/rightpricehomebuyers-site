@@ -7,6 +7,7 @@
 .gfield_error input, .gfield_error select, .gfield_error textarea { border-color: #c02b0a !important; }
 /* Address suggestions under the property-address box (see forms.js, attachAutocomplete). */
 .rp-ac-list { position: absolute; left: 0; right: 0; top: 100%; z-index: 9999; margin-top: 2px; background: #fff; border: 1px solid #cfd6e4; border-radius: 6px; box-shadow: 0 6px 18px rgba(17, 35, 55, .18); text-align: left; overflow: hidden; }
-.rp-ac-item { padding: 9px 12px; font-size: 14px; line-height: 1.35; color: #112337; cursor: pointer; }
-.rp-ac-item:hover, .rp-ac-item.is-active { background: #eef3ff; }
-.rp-ac-credit { padding: 4px 12px 6px; font-size: 11px; color: #6b7280; text-align: right; border-top: 1px solid #eef0f4; }
+/* !important colors: the hero form's theme styles force white text on everything inside it. */
+.rp-ac-list .rp-ac-item { padding: 9px 12px; font-size: 14px; font-weight: 400; line-height: 1.35; color: #112337 !important; background: #fff; cursor: pointer; }
+.rp-ac-list .rp-ac-item:hover, .rp-ac-list .rp-ac-item.is-active { background: #eef3ff; }
+.rp-ac-list .rp-ac-credit { padding: 4px 12px 6px; font-size: 11px; color: #6b7280 !important; background: #fff; text-align: right; border-top: 1px solid #eef0f4; }

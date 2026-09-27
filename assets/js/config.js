@@ -11,10 +11,17 @@
  * SEND_STEP1_PARTIAL: the live site records a lead as soon as step 1 of the cash-offer form is
  * filled in. When true, step 1 is also POSTed on its own (form_name "offer_step1") so a seller who
  * never finishes step 2 is not lost. Step 1 and step 2 share the same lead_session_id.
+ *
+ * GOOGLE_MAPS_KEY: browser key for address suggestions on the property-address boxes (Google
+ * Cloud project "My First Project" on contact@clehomepros.com, key "RPHB websites - address
+ * autocomplete"). The key is locked in Google Cloud to rightpricehomebuyers.com and
+ * teammatecle.github.io and to the Maps JavaScript / Places APIs, so it is safe in page source.
+ * Empty = no suggestions; visitors type the full address as before.
  */
 window.SITE_CONFIG = {
   FORM_ENDPOINT: 'https://hooks.zapier.com/hooks/catch/23924041/4dvth39/', // Zapier "Website form submissions" zap
   FORM_SEND_AS_TEXT_PLAIN: true,
   SEND_STEP1_PARTIAL: true,
-  PHONE_DISPLAY: '(216) 999-6814'
+  PHONE_DISPLAY: '(216) 999-6814',
+  GOOGLE_MAPS_KEY: 'AIzaSyAmdJoyeJKJ8O8px9lpDruW5n-mzeop2rM'
 };

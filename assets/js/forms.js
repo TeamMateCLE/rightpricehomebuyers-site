@@ -206,7 +206,133 @@
     });
   }
 
+  // ---------- address autocomplete (Google Places API (New)); off while GOOGLE_MAPS_KEY is empty ----------
+  // Replaces the Gravity Forms geolocation add-on the live site ran on ReSimpli's Google key: suggests
+  // addresses as the seller types, then fills the city / state / ZIP fields of the same form.
+  var places = null;       // google.maps.places once loaded
+  var mapsLoading = null;
+
+  function loadPlaces() {
+    if (places) return Promise.resolve(places);
+    if (mapsLoading) return mapsLoading;
+    mapsLoading = new Promise(function (resolve, reject) {
+      window.__rpMapsReady = function () {
+        google.maps.importLibrary('places').then(function (lib) { places = lib; resolve(lib); }, reject);
+      };
+      var s = document.createElement('script');
+      s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(cfg.GOOGLE_MAPS_KEY) +
+        '&v=weekly&loading=async&callback=__rpMapsReady';
+      s.async = true;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+    return mapsLoading;
+  }
+
+  function fillAddressParts(form, place) {
+    var parts = {};
+    (place.addressComponents || []).forEach(function (c) {
+      c.types.forEach(function (t) { parts[t] = c; });
+    });
+    var city = parts.locality || parts.sublocality || parts.postal_town || parts.administrative_area_level_3;
+    var set = function (name, value) {
+      var el = form.querySelector('[name="' + name + '"]');
+      if (!el || !value || el.readOnly) return;
+      if (el.tagName === 'SELECT') {
+        var opt = Array.prototype.find.call(el.options, function (o) { return o.value === value; });
+        if (opt) el.value = value;
+      } else { el.value = value; }
+    };
+    set('city', city && city.longText);
+    var st = parts.administrative_area_level_1;
+    if (st) set('state', form.querySelector('select[name="state"]') ? st.longText : st.shortText);
+    set('zip', parts.postal_code && parts.postal_code.longText);
+  }
+
+  function attachAutocomplete(input) {
+    var form = input.form;
+    var holder = input.parentNode;
+    if (getComputedStyle(holder).position === 'static') holder.style.position = 'relative';
+    var list = document.createElement('div');
+    list.className = 'rp-ac-list';
+    list.setAttribute('role', 'listbox');
+    list.hidden = true;
+    holder.appendChild(list);
+    input.setAttribute('aria-autocomplete', 'list');
+    input.setAttribute('autocomplete', 'off');   // stop the browser's own suggestions covering ours
+
+    var token = null, timer = null, items = [], active = -1, seq = 0;
+    function close() { list.hidden = true; list.innerHTML = ''; items = []; active = -1; }
+    function highlight(i) {
+      active = i;
+      Array.prototype.forEach.call(list.querySelectorAll('.rp-ac-item'), function (n, k) {
+        n.classList.toggle('is-active', k === i);
+      });
+    }
+    function choose(i) {
+      var pred = items[i];
+      close();
+      if (!pred) return;
+      input.value = pred.text.toString().replace(/, USA$/, '');
+      var place = pred.toPlace();
+      place.fetchFields({ fields: ['addressComponents', 'formattedAddress'] }).then(function () {
+        if (place.formattedAddress) input.value = place.formattedAddress.replace(/, USA$/, '');
+        fillAddressParts(form, place);
+      }).catch(function (err) { console.warn('[address] details failed', err); });
+      token = null;   // a finished lookup ends the billing session
+    }
+    function render(suggestions) {
+      list.innerHTML = '';
+      items = suggestions.map(function (s) { return s.placePrediction; }).filter(Boolean);
+      if (!items.length) { close(); return; }
+      items.forEach(function (p, i) {
+        var row = document.createElement('div');
+        row.className = 'rp-ac-item';
+        row.setAttribute('role', 'option');
+        row.textContent = p.text.toString().replace(/, USA$/, '');
+        row.addEventListener('mousedown', function (e) { e.preventDefault(); choose(i); });
+        list.appendChild(row);
+      });
+      var credit = document.createElement('div');
+      credit.className = 'rp-ac-credit';
+      credit.textContent = 'Powered by Google';
+      list.appendChild(credit);
+      list.hidden = false;
+      active = -1;
+    }
+    input.addEventListener('input', function () {
+      clearTimeout(timer);
+      var q = input.value.trim();
+      if (input.readOnly || q.length < 4) { close(); return; }
+      timer = setTimeout(function () {
+        var mine = ++seq;
+        loadPlaces().then(function (lib) {
+          if (!token) token = new lib.AutocompleteSessionToken();
+          return lib.AutocompleteSuggestion.fetchAutocompleteSuggestions({
+            input: q,
+            sessionToken: token,
+            includedRegionCodes: ['us'],
+            locationBias: { center: { lat: 41.4993, lng: -81.6944 }, radius: 50000 }   // Cleveland first
+          });
+        }).then(function (res) {
+          if (mine === seq) render(res.suggestions || []);
+        }).catch(function (err) { console.warn('[address] suggestions failed', err); close(); });
+      }, 250);
+    });
+    input.addEventListener('keydown', function (e) {
+      if (list.hidden) return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); highlight(Math.min(active + 1, items.length - 1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); highlight(Math.max(active - 1, 0)); }
+      else if (e.key === 'Enter' && active >= 0) { e.preventDefault(); choose(active); }
+      else if (e.key === 'Escape') { close(); }
+    });
+    input.addEventListener('blur', function () { setTimeout(close, 150); });
+  }
+
   function init() {
+    if ((cfg.GOOGLE_MAPS_KEY || '').trim()) {
+      document.querySelectorAll('form[data-rp-form] input[name="property_address"]').forEach(attachAutocomplete);
+    }
     document.querySelectorAll('form[data-rp-form]').forEach(function (form) {
       form.addEventListener('submit', handleSubmit);
       form.querySelectorAll('[data-us-phone]').forEach(function (el) {
